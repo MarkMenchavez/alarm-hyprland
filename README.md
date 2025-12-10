@@ -22,7 +22,7 @@
   1. cfdisk /dev/nvme0n1
      gpt label
      p1 512M   BIOS boot
-     p2 2048M  EFI System
+     p2 1024M  EFI System
      p3 2048M  Linux extended boot
      p4 8192M  Linux swap
      p5 40960M Linux root arm-64
@@ -63,19 +63,15 @@
   ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
   hwclock --systohc
   nano /etc/locale.gen
-  en_US.UTF-8 UTF-8
+    en_US.UTF-8 UTF-8
   locale-gen
   echo "LANG=en_US.UTF-8" > /etc/locale.conf
   echo "vm-alarm-hyprland" > /etc/hostname
-  cat >> /etc/hosts <<EOF
-    127.0.0.1   localhost
-    ::1         localhost
-  EOF
   passwd
   useradd -m -G wheel -s /bin/bash mcdm
   passwd mcdm
   EDITOR=nano visudo
-  %wheel ALL=(ALL) ALL
+    %wheel ALL=(ALL) ALL
 
   bootctl --esp-path=/efi --boot-path=/boot install
 
@@ -93,4 +89,19 @@
   blkid /dev/nvme0n1p5
 
   bootctl --esp-path=/efi --path=/boot/efi update
-  
+
+  nano /etc/systemd/network/ens160-ethernet.network
+    [Match]
+    Name=ens160
+
+    [Network]
+    MulticastDNS=yes
+    DHCP=yes
+
+  systemctl enable --now systemd-networkd
+  systemctl enable --now systemd-resolved
+  sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+  exit
+  umount -R /mnt
+  reboot
