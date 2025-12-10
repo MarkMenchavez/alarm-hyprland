@@ -23,15 +23,14 @@
      gpt label
      p1 512M   BIOS boot
      p2 2048M  EFI System
-     p3 2048M  Linux filesystem
+     p3 2048M  Linux extended boot
      p4 8192M  Linux swap
-     p5 40960M Linux filesystem
-     p6 rest   Linux filesystem
+     p5 40960M Linux root arm-64
+     p6 rest   Linux home
   2. mkfs.btrfs /dev/nvme0n1p5
      mkfs.btrfs /dev/nvme0n1p6
      mkswap /dev/nvme0n1p4
-     swapon /dev/nvme0n1p4
-     mkfs.ext4 /dev/nvme0n1p3
+     mkfs.fat -F32 /dev/nvme0n1p3
      mkfs.fat -F32 /dev/nvme0n1p2
   3. mount /dev/nvme0n1p5 /mnt
      btrfs subvolume create /mnt/@
@@ -44,8 +43,9 @@
      mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
      mkdir /mnt/boot
      mount -o rw,noatime /dev/nvme0n1p3 /mnt/boot
-     mkdir -p /mnt/boot/efi
-     mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/boot/efi
+     mkdir -p /mnt/efi
+     mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/efi
+     swapon /dev/nvme0n1p4
 
 * Connect to Network
   systemctl restart systemd-networkd
@@ -59,6 +59,7 @@
   pacstrap /mnt base linux linux-firmware btrfs-progs nano sudo
   genfstab -U -p /mnt >> /mnt/etc/fstab
   arch-chroot /mnt
+  mkinitcpio -P
   ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
   hwclock --systohc
   nano /etc/locale.gen
@@ -75,18 +76,21 @@
   passwd mcdm
   EDITOR=nano visudo
   %wheel ALL=(ALL) ALL
-  bootctl --path=/boot/efi install
 
-  /boot/efi/loader/loader.conf
-  default arch.conf
+  bootctl --esp-path=/efi --boot-path=/boot install
+
+  /efi/loader/loader.conf
+  default arch
   timeout 3
   editor 0
   
-  /boot/efi/loader/entries/arch.conf
+  /boot/loader/entries/arch.conf
   title   Arch Linux ARM
-  linux   /boot/Image
-  initrd  /boot/initramfs-inux.img
-  options root=PARTUUID=<PARTUUID-of-p5> rw rootflags=subvol=@
+  linux   /Image
+  initrd  /initramfs-linux.img
+  options root=PARTUUID=<PARTUUID-of-p5> rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@
 
-  bootctl --path=/boot/efi update
+  blkid /dev/nvme0n1p5
+
+  bootctl --esp-path=/efi --path=/boot/efi update
   
