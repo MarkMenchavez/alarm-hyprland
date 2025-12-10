@@ -15,6 +15,39 @@
   Storage             : NVMe 80GB
   Default Applications: None
   Keyboard & Mouse    : Mac Profile
+
+* Boot from ISO file
   
-  
-  
+* Partition and Format Manually
+  1. cfdisk /dev/nvme0n1
+     gpt label
+     p1 512M   BIOS boot
+     p2 2048M  EFI System
+     p3 2048M  Linux filesystem
+     p4 8192M  Linux swap
+     p5 40960M Linux filesystem
+     p6 rest   Linux filesystem
+  2. mkfs.btrfs /dev/nvme0n1p5
+     mkfs.btrfs /dev/nvme0n1p6
+     mkswap /dev/nvme0n1p4
+     swapon /dev/nvme0n1p4
+     mkfs.ext4 /dev/nvme0n1p3
+     mkfs.fat -F32 /dev/nvme0n1p2
+  3. mount /dev/nvme0n1p5 /mnt
+     btrfs subvolume create /mnt/@
+     umount -R /mnt
+     mount /dev/nvme0n1p6 /mnt
+     btrfs subvolume create /mnt/@home
+     umount -R /mnt
+  4. mount -o subvol=@,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt
+     mkdir /mnt/home
+     mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
+     mkdir /mnt/boot
+     mount -o rw,noatime /dev/nvme0n1p3 /mnt/boot
+     mkdir -p /mnt/boot/efi
+     mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/boot/efi
+
+* Connect to Network
+  ip link show
+  ip link set ens160 up
+     
