@@ -48,6 +48,45 @@
      mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/boot/efi
 
 * Connect to Network
+  systemctl restart systemd-networkd
+  systemctl restart systemd-resolved
   ip link show
-  ip link set ens160 up
-     
+  ip addr show
+  ping 8.8.8.8
+  ping mirror.archlinuxarm.org
+
+* Install Arch Linux ARM
+  pacstrap /mnt base linux linux-firmware btrfs-progs nano sudo
+  genfstab -U -p /mnt >> /mnt/etc/fstab
+  arch-chroot /mnt
+  ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
+  hwclock --systohc
+  nano /etc/locale.gen
+  en_US.UTF-8 UTF-8
+  locale-gen
+  echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  echo "vm-alarm-hyprland" > /etc/hostname
+  cat >> /etc/hosts <<EOF
+    127.0.0.1   localhost
+    ::1         localhost
+  EOF
+  passwd
+  useradd -m -G wheel -s /bin/bash mcdm
+  passwd mcdm
+  EDITOR=nano visudo
+  %wheel ALL=(ALL) ALL
+  bootctl --path=/boot/efi install
+
+  /boot/efi/loader/loader.conf
+  default arch.conf
+  timeout 3
+  editor 0
+  
+  /boot/efi/loader/entries/arch.conf
+  title   Arch Linux ARM
+  linux   /boot/Image
+  initrd  /boot/initramfs-inux.img
+  options root=PARTUUID=<PARTUUID-of-p5> rw rootflags=subvol=@
+
+  bootctl --path=/boot/efi update
+  
