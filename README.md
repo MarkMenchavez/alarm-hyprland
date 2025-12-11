@@ -34,7 +34,7 @@ archboot-2025.12.07-02.09-6.18.0-3-aarch64-ARCH-local-aarch64.iso
 gpt label
 
 | Partition  | Size   | Type                | Remarks                                    |
-|------------|--------|---------------------|--------------------------------------------|
+|------------|-------:|:-------------------:|--------------------------------------------|
 | nvme0n1p1  | 512M   | BIOS boot           | *Not Used*                                 |
 | nvme0n1p2  | 1024M  | EFI System          |                                            |
 | nvme0n1p3  | 2048M  | Linux extended boot | Merge with EFI if no plans on encryption   |
@@ -63,9 +63,9 @@ gpt label
 ## Mount
 
     mount -o subvol=@,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt
-    mkdir /mnt/home
+    mkdir -p /mnt/home
     mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
-    mkdir /mnt/boot
+    mkdir -p /mnt/boot
     mount -o rw,noatime /dev/nvme0n1p3 /mnt/boot
     mkdir -p /mnt/efi
     mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/efi
@@ -178,7 +178,7 @@ gpt label
       KEYMAP=us
       FONT=ter-v16n
 
-## Packages
+## Services
 
     systemctl enable --now paccache.timer
 
@@ -187,5 +187,4 @@ gpt label
     exit
     umount -R /mnt
     reboot
-
-## Install packages
+    
