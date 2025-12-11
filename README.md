@@ -158,6 +158,17 @@
     When = PostTransaction
     Exec = /usr/bin/bootctl update
 
+  /etc/pacman.d/hooks/999-systemd-bootd.hook
+    [Trigger]
+    Operation = Upgrade
+    Type = Package
+    Target = systemd
+
+    [Action]
+    Description = Gracefully upgrading systemd-boot...
+    When = PostTransaction
+    Exec /usr/bin/systemctl restart systemd-boot-update.service
+
 * Install packages
     bash-completion
     efibootmgr
