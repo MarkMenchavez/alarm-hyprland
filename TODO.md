@@ -2,11 +2,12 @@
 
 ----
 
-- [ ] plymouth default theme
-- [ ] ufw firewall
+- [x] Arch Linux ARM
+- [ ] plymouth
+- [ ] pacman config and mirror list
 - [ ] timeshift
-- [ ] pacman mirrorlist
+- [ ] ufw firewall
 - [ ] yay AUR helper
-- [ ] hyprland
+- [ ] Hyprland
 - [ ] kitty
 - [ ] dotfiles
