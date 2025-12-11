@@ -66,6 +66,8 @@
                 terminus-font
                 nano
                 sudo
+                plymouth
+                pacman-contrib
 
   genfstab -U -p /mnt >> /mnt/etc/fstab
 
@@ -73,6 +75,7 @@
 
   nano /etc/mkinitcpio.conf
     MODULES=(btrfs vfat crc32c)
+    HOOKS=(...systemd plymouth...)
   mkinitcpio -P
 
   ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
@@ -102,14 +105,14 @@
 
   /efi/loader/loader.conf
   default arch
-  timeout 3
+  timeout 0
   editor 0
   
   /boot/loader/entries/arch.conf
   title   Arch Linux ARM
   linux   /Image
   initrd  /initramfs-linux.img
-  options root=PARTUUID=<PARTUUID-of-p5> rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@
+  options root=PARTUUID=<PARTUUID-of-p5> rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@ quiet splash loglevel=0 rd.udev.log_level=0
 
   blkid /dev/nvme0n1p5
 
@@ -131,6 +134,8 @@
     KEYMAP=us
     FONT=ter-v16a
 
+  systemctl enable --now paccache.timer
+    
   exit
   umount -R /mnt
   reboot
@@ -176,7 +181,3 @@
 
 * Install packages
   
-    sudo pacman -Sy --noconfirm --needed pacman-contrib
-    sudo systemctl enable --now paccache.timer
-
-    sudo pacman -Sy plymouth
