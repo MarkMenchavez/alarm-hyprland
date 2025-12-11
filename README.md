@@ -175,9 +175,8 @@
     Exec /usr/bin/systemctl restart systemd-boot-update.service
 
 * Install packages
-    bash-completion
-    efibootmgr
-    efivar
-    pacman-contrib
-    plymouth
   
+    sudo pacman -Sy --noconfirm --needed pacman-contrib
+    sudo systemctl enable --now paccache.timer
+
+    sudo pacman -Sy plymouth
