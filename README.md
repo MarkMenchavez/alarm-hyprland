@@ -130,9 +130,38 @@
   umount -R /mnt
   reboot
 
+* Setup Hooks
+
+  /etc/profile.d/archboot.sh
+    export PS1='[\[\e[1;32m\]\u\[\e[0m\]@\[\e[1;34m\]\h\[\e[0m\] \w]\$ '
+    setfont ter-v16n
+
+  /etc/pacman.d/hooks/90-mkinitcpio.hook
+    [Trigger]
+    Operation = Upgrade
+    Type = Package
+    Target = linux-aarch64
+
+    [Action]
+    Description = Updating initramfs after kernel upgrade...
+    When = PostTransaction
+    Exec = /usr/bin/mkinitcpio -P
+
+  /etc/pacman.d/hooks/95-systemd-boot.hook
+    [Trigger]
+    Operation = Upgrade
+    Type = Package
+    Target = linux-aarch64
+
+    [Action]
+    Description = Updating systemd-boot loader entries...
+    When = PostTransaction
+    Exec = /usr/bin/bootctl update
+
 * Install packages
     bash-completion
     efibootmgr
     efivar
     pacman-contrib
     plymouth
+  
