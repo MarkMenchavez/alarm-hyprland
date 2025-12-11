@@ -56,20 +56,40 @@
   ping mirror.archlinuxarm.org
 
 * Install Arch Linux ARM
-  pacstrap /mnt base linux linux-firmware btrfs-progs nano sudo
+  pacstrap /mnt base
+                iptables-nft
+                linux
+                linux-firmware
+                polkit
+                btrfs-progs
+                dosfstools
+                terminus-font
+                nano
+                sudo
+
   genfstab -U -p /mnt >> /mnt/etc/fstab
+
   arch-chroot /mnt
+
+  nano /etc/mkinitcpio.conf
+    MODULES=(btrfs vfat crc32c)
   mkinitcpio -P
+
   ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
   hwclock --systohc
+  
   nano /etc/locale.gen
     en_US.UTF-8 UTF-8
   locale-gen
   echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  
   echo "vm-alarm-hyprland" > /etc/hostname
+  
   passwd
-  useradd -m -G wheel -s /bin/bash mcdm
+  
+  useradd -m -G wheel -s /bin/bash mcdm -c "Mark Menchavez"
   passwd mcdm
+  
   EDITOR=nano visudo
     %wheel ALL=(ALL) ALL
 
@@ -102,6 +122,17 @@
   systemctl enable --now systemd-resolved
   sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
+  nano /etc/vconsole.conf
+    KEYMAP=us
+    FONT=ter-v16a
+
   exit
   umount -R /mnt
   reboot
+
+* Install packages
+    bash-completion
+    efibootmgr
+    efivar
+    pacman-contrib
+    plymouth
