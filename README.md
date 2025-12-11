@@ -77,6 +77,11 @@
 
   ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
   hwclock --systohc
+
+  timedatectl set-timezone Asia/Singapore
+  timedatectl set-ntp true
+  systemctl enable --now systemd-timesyncd
+  hwclock --systohc
   
   nano /etc/locale.gen
     en_US.UTF-8 UTF-8
