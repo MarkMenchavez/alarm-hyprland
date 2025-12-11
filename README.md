@@ -1,10 +1,10 @@
 # alarm-hyprland
 
-----------
+----
 
 ## Virtual Machine
 
-|                      |                                                      |
+| Settings             |                                                      |
 |----------------------|------------------------------------------------------|
 | Host                 | M1 Macbook Pro                                       |
 | Type 2 Hypervisor    | VMWare Fusion 13.6                                   |
@@ -23,7 +23,7 @@
   
 ## ISO
 
-[https://archboot.com](https://archboot.com)
+<https://archboot.com>
 
 archboot-2025.12.07-02.09-6.18.0-3-aarch64-ARCH-local-aarch64.iso
 
@@ -35,9 +35,9 @@ gpt label
 
 | Partition  | Size   | Type                | Remarks                                    |
 |------------|--------|---------------------|--------------------------------------------|
-| nvme0n1p1  | 512M   | BIOS boot           | Not Used                                   |
+| nvme0n1p1  | 512M   | BIOS boot           | *Not Used*                                 |
 | nvme0n1p2  | 1024M  | EFI System          |                                            |
-| nvme0n1p3  | 2048M  | Linux extended boot | Merge with EFI if no plans on partitioning |
+| nvme0n1p3  | 2048M  | Linux extended boot | Merge with EFI if no plans on encryption   |
 | nvme0n1p4  | 8192M  | Linux swap          | Consider zram                              |
 | nvme0n1p5  | 40960M | Linux root arm-64   |                                            |
 | nvme0n1p6  | rest   | Linux home          | Consider merging with root                 |
