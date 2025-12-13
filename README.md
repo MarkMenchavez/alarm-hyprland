@@ -29,7 +29,7 @@
 
 archboot-2025.12.07-02.09-6.18.0-3-aarch64-ARCH-local-aarch64.iso
 
-`curl -fsSL https://raw.githubusercontent.com/markmenchavez/alarm-hyprland/install.sh | bash`
+`curl -fsSL https://raw.githubusercontent.com/markmenchavez/alarm-hyprland/main/install.sh | bash`
 
 ## Partition
 
