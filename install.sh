@@ -56,16 +56,15 @@ info "Wiping filesystem signatures"
 wipefs -a "${DISK}"
 
 info "Creating GPT partition table"
-sfdisk "${DISK}" <<'EOF'
+sfdisk "$DISK" <<'EOF'
 label: gpt
-unit: MiB
-first-lba: 2048
-size=512,  type=ef02, name="BIOS boot"
-size=1024, type=ef00, name="EFI System"
-size=2048, type=8300, name="Linux boot"
-size=8192, type=8200, name="Linux swap"
-size=40960, type=8300, name="Linux root"
-type=8300, name="Linux home"
+
+2048MiB,512MiB,EF02,BiosBoot
+,1024MiB,EF00,EFI
+,2048MiB,8300,boot
+,8192MiB,8200,swap
+,40960MiB,8300,root
+,,8300,home
 EOF
 
 info "Reloading partition table"
