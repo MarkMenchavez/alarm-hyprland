@@ -62,7 +62,7 @@ gpt label
 
     mount /dev/nvme0n1p6 /mnt
     btrfs subvolume create /mnt/@home
-    umount -R /mnt`
+    umount -R /mnt
 
 ## Mount
 
