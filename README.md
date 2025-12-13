@@ -37,14 +37,14 @@ archboot-2025.12.07-02.09-6.18.0-3-aarch64-ARCH-local-aarch64.iso
 
 gpt label
 
-| Partition  | Size   | Type                | Remarks                                    |
-|------------|-------:|:-------------------:|--------------------------------------------|
-| nvme0n1p1  | 512M   | BIOS boot           | *Not Used*                                 |
-| nvme0n1p2  | 1024M  | EFI System          |                                            |
-| nvme0n1p3  | 2048M  | Linux extended boot | Merge with EFI if no plans on encryption   |
-| nvme0n1p4  | 8192M  | Linux swap          | Consider zram                              |
-| nvme0n1p5  | 40960M | Linux root arm-64   |                                            |
-| nvme0n1p6  | rest   | Linux home          | Consider merging with root                 |
+| Partition  | Size   | Type                | Remarks                                    |                                    |
+|------------|-------:|:-------------------:|--------------------------------------------|:----------------------------------:|
+| nvme0n1p1  | 512M   | BIOS boot           | *Not Used*                                 |21686148-6449-6E6F-744E-656564454649|
+| nvme0n1p2  | 1024M  | EFI System          |                                            |C12A7328-F81F-11D2-BA4B-00A0C93EC93B|
+| nvme0n1p3  | 2048M  | Linux extended boot | Merge with EFI if no plans on encryption   |BC13C2FF-59E6-4262-A352-B275FD6F7172|
+| nvme0n1p4  | 8192M  | Linux swap          | Consider zram                              |0657FD6D-A4AB-43C4-84E5-0933C84B4F4F|
+| nvme0n1p5  | 40960M | Linux root arm-64   |                                            |B921B045-1DF0-41C3-AF44-4C6F280D3FAE|
+| nvme0n1p6  | rest   | Linux home          | Consider merging with root                 |933AC7E1-2EB4-4F13-B844-0E14E2AEF915|
 
 ## Format
 
