@@ -1,4 +1,6 @@
-# alarm-hyprland
+# Arch Linux ARM
+
+<https://archlinuxarm.org>
 
 ----
 
@@ -66,7 +68,7 @@ gpt label
     mkdir -p /mnt/home
     mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
     mkdir -p /mnt/boot
-    mount -o rw,noatime /dev/nvme0n1p3 /mnt/boot
+    mount -o rw,noatime,umask=0077 /dev/nvme0n1p3 /mnt/boot
     mkdir -p /mnt/efi
     mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/efi
     swapon /dev/nvme0n1p4
@@ -83,20 +85,25 @@ gpt label
 ## Install
 
     pacstrap /mnt base \
-                  iptables-nft \
                   linux \
                   linux-firmware \
+                  device-mapper \
+                  networkmanager \
                   polkit \
+                  iptables-nft \
                   btrfs-progs \
                   dosfstools \
                   terminus-font \
                   nano \
                   sudo \
                   plymouth \
-                  pacman-contrib
+                  pacman-contrib \
+                  mesa
 
 ## FSTAB
   
+    lsblk -f
+
     genfstab -U -p /mnt >> /mnt/etc/fstab
 
 ## CHROOT
@@ -108,6 +115,11 @@ gpt label
     nano /etc/mkinitcpio.conf
           MODULES=(btrfs vfat crc32c)
           HOOKS=(...systemd plymouth...)
+    
+    plymounth-set-default-theme -R spinfinity
+    
+    # This might be redundant, 
+    # plymouth-set-default-theme -R <theme> already calls mkinitcpio internally
     mkinitcpio -P
 
 ## Date and Time
@@ -172,6 +184,9 @@ gpt label
     systemctl enable --now systemd-resolved
     ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
+    # Alternatively use NetworkManager instead (conflicts with systemd-networkd)
+    systemctl enable NetworkManager
+
 ## Font
 
     nano /etc/vconsole.conf
@@ -181,6 +196,8 @@ gpt label
 ## Services
 
     systemctl enable --now paccache.timer
+
+## Packages
 
 ## Done
   
