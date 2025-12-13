@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# Re-exec with bash if not already running under bash
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "Re-executing under bash..." >&2
+  exec /bin/bash
+fi
+
 set -Eeuo pipefail
 
 DISK="/dev/nvme0n1"
