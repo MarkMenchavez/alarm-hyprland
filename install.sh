@@ -7,8 +7,25 @@
 # -o pipefail: fail on first failed command in pipelines
 set -Eeuo pipefail
 
+# Log all output to a timestamped log file in /var/log
+LOG="/var/log/install-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$LOG") 2>&1
+echo "Logging to $LOG"
+
 # Target block device (change to the correct device before running)
 DISK="/dev/nvme0n1"
+
+# Unmount any mounts on this disk
+for m in $(mount | awk -v d="$DISK" '$0 ~ d {print $3}'); do
+  echo "Unmounting $m"
+  umount "$m" 2>/dev/null || umount -l "$m" 2>/dev/null || true
+done
+
+# Disable swap on partitions of this disk
+for s in $(swapon --noheadings --raw | awk -v d="$DISK" '$1 ~ d {print $1}'); do
+  echo "Turning off swap $s"
+  swapoff "$s" 2>/dev/null || true
+done
 
 # WARNING: destructive -- wipes filesystem signatures on the device
 # Make sure $DISK is correct before running this script.
@@ -89,21 +106,25 @@ lsblk "${DISK}"
 # Install a minimal set of packages into the new system. Add or remove
 # packages as needed for your target environment (especially the kernel
 # package for aarch64 if your repository differs).
-pacstrap /mnt base \
-              linux \
-              linux-firmware \
-              device-mapper \
-              networkmanager \
-              polkit \
-              iptables-nft \
-              btrfs-progs \
-              dosfstools \
-              terminus-font \
-              nano \
-              sudo \
-              plymouth \
-              pacman-contrib \
-              mesa
+PACKAGES=(
+    base
+    linux
+    linux-firmware
+    device-mapper
+    networkmanager
+    polkit
+    iptables-nft
+    btrfs-progs
+    dosfstools
+    terminus-font
+    nano
+    sudo
+    plymouth
+    pacman-contrib
+    mesa
+)
+
+pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
 
 # Generate fstab with UUIDs and append to target fstab
 genfstab -U -p /mnt >> /mnt/etc/fstab
