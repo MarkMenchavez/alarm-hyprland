@@ -99,6 +99,13 @@ gpt label
     
     swapon /dev/nvme0n1p4
 
+### Console
+
+    mkdir -p /mnt/etc
+    nano /etc/vconsole.conf
+      KEYMAP=us
+      FONT=ter-v16n
+
 ### Pacstrap
 
     pacstrap /mnt base \
@@ -114,8 +121,7 @@ gpt label
                   nano \
                   sudo \
                   plymouth \
-                  pacman-contrib \
-                  mesa
+                  pacman-contrib
 
 ### FSTAB
   
@@ -126,12 +132,6 @@ gpt label
 ### CHROOT
 
     arch-chroot /mnt
-
-#### Font
-
-    nano /etc/vconsole.conf
-      KEYMAP=us
-      FONT=ter-v16n
 
 #### MKINITCPIO
 
@@ -193,28 +193,14 @@ gpt label
 
     bootctl --esp-path=/efi --path=/boot/efi update
 
-#### Networking
-
-    nano /etc/systemd/network/ens160-ethernet.network
-       [Match]
-       Name=ens160
-
-       [Network]
-       MulticastDNS=yes
-       DHCP=yes
-
-    systemctl enable --now systemd-networkd
-    systemctl enable --now systemd-resolved
-    ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-
-    # Alternatively use NetworkManager instead (conflicts with systemd-networkd)
-    systemctl enable NetworkManager
-
 #### Services
 
-    systemctl enable --now paccache.timer
+    systemctl enable NetworkManager
+    systemctl enable paccache.timer
 
 #### Packages
+
+    pacman -Sy mesa
 
 #### Done
   

@@ -7,11 +7,6 @@
 # -o pipefail: fail on first failed command in pipelines
 set -Eeuo pipefail
 
-# Log all output to a timestamped log file in /var/log
-#LOG="/var/log/install-$(date +%Y%m%d-%H%M%S).log"
-#exec > >(tee -a "$LOG") 2>&1
-#echo "Logging to $LOG"
-
 # Target block device (change to the correct device before running)
 DISK="/dev/nvme0n1"
 
@@ -103,6 +98,15 @@ swapon "${DISK}p4"
 # Show resulting partition layout for verification
 lsblk "${DISK}"
 
+# Ensure minimal target /etc exists and write console settings before
+# running pacstrap. Some package hooks (mkinitcpio for the kernel)
+# execute during pacstrap and expect `/etc/vconsole.conf` to exist.
+mkdir -p /mnt/etc
+cat > /mnt/etc/vconsole.conf <<'EOF'
+KEYMAP=us
+FONT=ter-v16n
+EOF
+
 # Install a minimal set of packages into the new system. Add or remove
 # packages as needed for your target environment (especially the kernel
 # package for aarch64 if your repository differs).
@@ -121,19 +125,12 @@ PACKAGES=(
     sudo
     plymouth
     pacman-contrib
-    mesa
 )
 
-TERM=dumb pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
+pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
 
 # Generate fstab with UUIDs and append to target fstab
 genfstab -U -p /mnt >> /mnt/etc/fstab
-
-# Write console settings into the target root so they'll be present inside chroot
-cat > /mnt/etc/vconsole.conf <<'EOF'
-KEYMAP=us
-FONT=ter-v16n
-EOF
 
 echo "You may now customize the installation inside the chroot."
 arch-chroot /mnt
