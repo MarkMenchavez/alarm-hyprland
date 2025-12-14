@@ -114,17 +114,16 @@ PACKAGES=(
     base
     linux
     linux-firmware
+    
     device-mapper
-    networkmanager
-    polkit
-    iptables-nft
     btrfs-progs
     dosfstools
+
     terminus-font
     nano
+
     sudo
-    plymouth
-    pacman-contrib
+    polkit
 )
 
 pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
@@ -133,4 +132,28 @@ pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
 genfstab -U -p /mnt >> /mnt/etc/fstab
 
 echo "You may now customize the installation inside the chroot."
-arch-chroot /mnt
+arch-chroot /mnt /bin/bash
+
+timedatectl set-timezone Asia/Singapore
+timedatectl set-ntp true
+systemctl enable systemd-timesyncd
+ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
+hwclock --systohc
+
+bootctl --esp-path=/efi --boot-path=/boot install
+
+pacman -S networkmanager --noconfirm --needed
+systemctl enable NetworkManager
+
+pacman -S pacman-contrib --noconfirm --needed
+systemctl enable paccache.timer
+
+pacman -S plymounth --noconfirm --needed
+
+pacman -S iptables-nft ufw
+
+pacman -S mesa --noconfirm --needed
+
+# Exit chroot
+exit
+umount -R /mnt

@@ -82,7 +82,10 @@ gpt label
 
     mount -o subvol=@,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt
 
+    mkdir -p /mnt/var/log
     mount -o subvol=@log,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/log
+    
+    mkdir -p /mnt/var/cache
     mount -o subvol=@cache,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/cache
     
     mkdir -p /mnt/.snapshots
