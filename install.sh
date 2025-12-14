@@ -8,9 +8,9 @@
 set -Eeuo pipefail
 
 # Log all output to a timestamped log file in /var/log
-LOG="/var/log/install-$(date +%Y%m%d-%H%M%S).log"
-exec > >(tee -a "$LOG") 2>&1
-echo "Logging to $LOG"
+#LOG="/var/log/install-$(date +%Y%m%d-%H%M%S).log"
+#exec > >(tee -a "$LOG") 2>&1
+#echo "Logging to $LOG"
 
 # Target block device (change to the correct device before running)
 DISK="/dev/nvme0n1"
@@ -124,7 +124,7 @@ PACKAGES=(
     mesa
 )
 
-pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
+TERM=dumb pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
 
 # Generate fstab with UUIDs and append to target fstab
 genfstab -U -p /mnt >> /mnt/etc/fstab
