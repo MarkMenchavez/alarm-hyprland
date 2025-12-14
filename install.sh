@@ -43,8 +43,8 @@ udevadm settle --timeout=5 || true
 mkfs.fat -F32 "${DISK}p2"
 mkfs.fat -F32 "${DISK}p3"
 mkswap "${DISK}p4"
-mkfs.btrfs "${DISK}p5"
-mkfs.btrfs "${DISK}p6"
+mkfs.btrfs -f "${DISK}p5"
+mkfs.btrfs -f "${DISK}p6"
 
 # Create btrfs subvolumes on the main data partition and then unmount
 mount "${DISK}p5" /mnt  
