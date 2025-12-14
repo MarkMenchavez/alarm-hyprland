@@ -3,7 +3,7 @@
 ----
 
 - [x] Arch Linux ARM
-- [ ] plymouth
+- [x] plymouth
 - [ ] pacman config
 - [ ] pacman mirror list
 - [ ] timeshift

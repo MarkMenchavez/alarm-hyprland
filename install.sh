@@ -24,6 +24,9 @@ mkfs.btrfs /dev/nvme0n1p6
 
 mount /dev/nvme0n1p5 /mnt  
 btrfs subvolume create /mnt/@  
+btrfs subvolume create /mnt/@log
+btrfs subvolume create /mnt/@cache
+btrfs subvolume create /mnt/@snapshots
 umount -R /mnt
 
 mount /dev/nvme0n1p6 /mnt
@@ -31,12 +34,42 @@ btrfs subvolume create /mnt/@home
 umount -R /mnt
 
 mount -o subvol=@,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt
+
+mount -o subvol=@log,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/log
+mount -o subvol=@cache,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/cache
+    
+mkdir -p /mnt/.snapshots
+mount -o subvol=@snapshots,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/.snapshots
+
 mkdir -p /mnt/home
 mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
+
 mkdir -p /mnt/boot
 mount -o rw,noatime,umask=0077 /dev/nvme0n1p3 /mnt/boot
+
 mkdir -p /mnt/efi
 mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/efi
+
 swapon /dev/nvme0n1p4
 
 lsblk "${DISK}"
+
+pacstrap /mnt base \
+              linux \
+              linux-firmware \
+              device-mapper \
+              networkmanager \
+              polkit \
+              iptables-nft \
+              btrfs-progs \
+              dosfstools \
+              terminus-font \
+              nano \
+              sudo \
+              plymouth \
+              pacman-contrib \
+              mesa
+
+genfstab -U -p /mnt >> /mnt/etc/fstab
+
+arch-chroot /mnt
