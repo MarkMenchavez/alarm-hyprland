@@ -115,16 +115,13 @@ gpt label
                   linux \
                   linux-firmware \
                   device-mapper \
-                  networkmanager \
-                  polkit \
-                  iptables-nft \
                   btrfs-progs \
                   dosfstools \
+                  iptables-nft \
                   terminus-font \
                   nano \
                   sudo \
-                  plymouth \
-                  pacman-contrib
+                  polkit
 
 ### FSTAB
   
@@ -136,17 +133,9 @@ gpt label
 
     arch-chroot /mnt
 
-#### MKINITCPIO
-
-    nano /etc/mkinitcpio.conf
-          MODULES=(btrfs vfat crc32c)
-          HOOKS=(...systemd plymouth...)
-
-    plymounth-set-default-theme -R spinfinity
-    
-    # This might be redundant, 
-    # plymouth-set-default-theme -R <theme> already calls mkinitcpio internally
-    mkinitcpio -P
+#### Hostname
+  
+    echo "vm-alarm-hyprland" > /etc/hostname
 
 #### Date and Time
 
@@ -162,20 +151,6 @@ gpt label
       en_US.UTF-8 UTF-8
     locale-gen
     echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
-#### Hostname
-  
-    echo "vm-alarm-hyprland" > /etc/hostname
-
-#### User Accounts  
-  
-    passwd
-  
-    useradd -m -G wheel -s /bin/bash mcdm -c "Mark Menchavez"
-    passwd mcdm
-  
-    EDITOR=nano visudo
-      %wheel ALL=(ALL) ALL
 
 #### Boot loader
 
@@ -194,16 +169,41 @@ gpt label
 
     blkid /dev/nvme0n1p5
 
-    bootctl --esp-path=/efi --path=/boot/efi update
+#### MKINITCPIO
+
+    pacman -S plymouth --noconfirm --needed
+
+    nano /etc/mkinitcpio.conf
+          MODULES=(btrfs vfat crc32c)
+          HOOKS=(...systemd plymouth...)
+
+    plymouth-set-default-theme -R spinfinity
+    
+    # This might be redundant, 
+    # plymouth-set-default-theme -R <theme> already calls mkinitcpio internally
+    mkinitcpio -P
 
 #### Services
 
+    pacman -S networkmanager --noconfirm --needed
     systemctl enable NetworkManager
+
+    pacman -S pacman-contrib --noconfirm --needed
     systemctl enable paccache.timer
 
 #### Packages
 
     pacman -Sy mesa
+
+#### User Accounts  
+  
+    passwd
+  
+    useradd -m -G wheel -s /bin/bash mcdm -c "Mark Menchavez"
+    passwd mcdm
+  
+    EDITOR=nano visudo
+      %wheel ALL=(ALL) ALL
 
 #### Done
   

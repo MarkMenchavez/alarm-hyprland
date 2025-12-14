@@ -10,6 +10,18 @@ set -Eeuo pipefail
 # Target block device (change to the correct device before running)
 DISK="/dev/nvme0n1"
 
+# require root
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root." >&2
+  exit 1
+fi
+
+# ensure disk exists
+if [[ ! -b "$DISK" ]]; then
+  echo "Block device $DISK not found." >&2
+  exit 1
+fi
+
 # Unmount any mounts on this disk
 for m in $(mount | awk -v d="$DISK" '$0 ~ d {print $3}'); do
   echo "Unmounting $m"
@@ -114,7 +126,9 @@ PACKAGES=(
     base
     linux
     linux-firmware
-    
+
+    iptables-nft
+
     device-mapper
     btrfs-progs
     dosfstools
@@ -131,29 +145,79 @@ pacstrap /mnt "${PACKAGES[@]}" --needed --noconfirm
 # Generate fstab with UUIDs and append to target fstab
 genfstab -U -p /mnt >> /mnt/etc/fstab
 
-echo "You may now customize the installation inside the chroot."
-arch-chroot /mnt /bin/bash
+# Ensure `en_US.UTF-8 UTF-8` is enabled in the target locale.gen so
+# running `locale-gen` inside the chroot will generate the locale.
+if [ -f /mnt/etc/locale.gen ]; then
+  sed -i 's/^#\s*en_US.UTF-8\s\+UTF-8/en_US.UTF-8 UTF-8/' /mnt/etc/locale.gen || true
+fi
 
+# Enter chroot to perform further configuration
+arch-chroot /mnt /bin/bash <<'CHROOT_EOF'
+
+echo Setting hostname.
+echo "vm-alarm-hyprland" > /etc/hostname
+
+echo "Setting timezone with NTP enabled."
 timedatectl set-timezone Asia/Singapore
 timedatectl set-ntp true
 systemctl enable systemd-timesyncd
 ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
 hwclock --systohc
 
-bootctl --esp-path=/efi --boot-path=/boot install
+echo Generating locales.
+locale-gen
+echo LANG=en_US.UTF-8 > /etc/locale.conf
 
-pacman -S networkmanager --noconfirm --needed
-systemctl enable NetworkManager
-
+echo Enabling periodic cleanup of cached packages.
 pacman -S pacman-contrib --noconfirm --needed
 systemctl enable paccache.timer
 
-pacman -S plymounth --noconfirm --needed
+# Prepare systemd-boot configuration files on the target ESP/boot so they
+# exist after installation. Determine PARTUUID for the root partition (p5)
+# and write a boot entry referencing it.
+DISK="/dev/nvme0n1"
+PARTUUID="$(blkid -s PARTUUID -o value "${DISK}p5" || true)"
 
-pacman -S iptables-nft ufw
+echo Installing bootloader.
+bootctl --esp-path=/efi --boot-path=/boot install
 
+cat > /efi/loader/loader.conf <<'EOF'
+default arch
+timeout 0
+editor 0
+EOF
+
+cat > /boot/loader/entries/arch.conf <<EOF
+title   Arch Linux ARM
+linux   /Image
+initrd  /initramfs-linux.img
+options root=PARTUUID=$PARTUUID rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@ quiet splash loglevel=0 rd.udev.log_level=0
+EOF
+
+# set required MODULES
+sed -i 's/^MODULES=.*/MODULES=(btrfs vfat crc32c)/' /etc/mkinitcpio.conf
+# This is redundant since plymouth-set-default-theme -R calls mkinitcpio
+#mkinitcpio -P 
+
+echo Enabling Boot splash theme.
+pacman -S plymouth --noconfirm --needed
+
+# simple edit: insert plymouth between systemd and autodetect
+sed -i 's/systemd[[:space:]]\+autodetect/systemd plymouth autodetect/' /etc/mkinitcpio.conf
+plymouth-set-default-theme -R spinfinity
+    
+# plymouth-set-default-theme -R <theme> already calls mkinitcpio internally
+#mkinitcpio -P
+
+echo Enabling networking services.
+pacman -S networkmanager --noconfirm --needed
+systemctl enable NetworkManager
+
+pacman -S timeshift --noconfirm --needed
+pacman -S ufw --noconfirm --needed
 pacman -S mesa --noconfirm --needed
 
+CHROOT_EOF
+
 # Exit chroot
-exit
 umount -R /mnt
