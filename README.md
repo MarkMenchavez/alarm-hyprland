@@ -71,6 +71,7 @@ gpt label
     btrfs subvolume create /mnt/@  
     btrfs subvolume create /mnt/@log
     btrfs subvolume create /mnt/@cache
+    btrfs subvolume create /mnt/@tmp
     btrfs subvolume create /mnt/@snapshots
     umount -R /mnt
 
@@ -87,7 +88,10 @@ gpt label
     
     mkdir -p /mnt/var/cache
     mount -o subvol=@cache,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/cache
-    
+
+    mkdir -p /mnt/tmp
+    mount -o subvol=@tmp,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/tmp
+
     mkdir -p /mnt/.snapshots
     mount -o subvol=@snapshots,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/.snapshots
 
