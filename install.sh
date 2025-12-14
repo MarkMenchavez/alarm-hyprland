@@ -7,16 +7,16 @@
 # -o pipefail: fail on first failed command in pipelines
 set -Eeuo pipefail
 
-# Target block device (change to the correct device before running)
-DISK="/dev/nvme0n1"
-
-# require root
+# Require root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root." >&2
   exit 1
 fi
 
-# ensure disk exists
+# Target block device (change to the correct device before running)
+DISK="/dev/nvme0n1"
+
+# Ensure disk exists
 if [[ ! -b "$DISK" ]]; then
   echo "Block device $DISK not found." >&2
   exit 1
@@ -75,6 +75,8 @@ mount "${DISK}p5" /mnt
 btrfs subvolume create /mnt/@  
 btrfs subvolume create /mnt/@log
 btrfs subvolume create /mnt/@cache
+btrfs subvolume create /mnt/@spool
+btrfs subvolume create /mnt/@vartmp
 btrfs subvolume create /mnt/@tmp
 btrfs subvolume create /mnt/@snapshots
 umount -R /mnt
@@ -94,6 +96,12 @@ mount -o subvol=@log,compress=lzo,noatime,ssd "${DISK}p5" /mnt/var/log
 mkdir -p /mnt/var/cache
 mount -o subvol=@cache,compress=lzo,noatime,ssd "${DISK}p5" /mnt/var/cache
 
+mkdir -p /mnt/var/spool
+mount -o subvol=@spool,compress=lzo,noatime,ssd "${DISK}p5" /mnt/var/spool
+
+mkdir -p /mnt/var/tmp
+mount -o subvol=@vartmp,compress=lzo,noatime,ssd "${DISK}p5" /mnt/var/tmp
+
 mkdir -p /mnt/tmp
 mount -o subvol=@tmp,compress=zstd,noatime,ssd "${DISK}p5" /mnt/tmp
 
@@ -106,8 +114,8 @@ mount -o subvol=@home,compress=zstd,noatime,ssd "${DISK}p6" /mnt/home
 mkdir -p /mnt/boot
 mount -o rw,noatime,umask=0077 "${DISK}p3" /mnt/boot
 
-mkdir -p /mnt/efi
-mount -o rw,noatime,umask=0077 "${DISK}p2" /mnt/efi
+mkdir -p /mnt/boot/efi
+mount -o rw,noatime,umask=0077 "${DISK}p2" /mnt/boot/efi
 
 swapon "${DISK}p4"
 
@@ -183,7 +191,7 @@ DISK="/dev/nvme0n1"
 PARTUUID="$(blkid -s PARTUUID -o value "${DISK}p5" || true)"
 
 echo Installing bootloader.
-bootctl --esp-path=/efi --boot-path=/boot install
+bootctl --esp-path=/boot/efi --boot-path=/boot install
 
 cat > /efi/loader/loader.conf <<'EOF'
 default arch
@@ -217,11 +225,11 @@ echo Enabling networking services.
 pacman -S networkmanager --noconfirm --needed
 systemctl enable NetworkManager
 
-pacman -S timeshift --noconfirm --needed
-pacman -S ufw --noconfirm --needed
-pacman -S mesa --noconfirm --needed
+#pacman -S timeshift --noconfirm --needed
+#pacman -S ufw --noconfirm --needed
+#pacman -S mesa --noconfirm --needed
 
 CHROOT_EOF
 
 # Exit chroot
-umount -R /mnt
+#umount -R /mnt

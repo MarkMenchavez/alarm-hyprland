@@ -71,6 +71,8 @@ gpt label
     btrfs subvolume create /mnt/@  
     btrfs subvolume create /mnt/@log
     btrfs subvolume create /mnt/@cache
+    btrfs subvolume create /mnt/@spool
+    btrfs subvolume create /mnt/@vartmp
     btrfs subvolume create /mnt/@tmp
     btrfs subvolume create /mnt/@snapshots
     umount -R /mnt
@@ -89,6 +91,12 @@ gpt label
     mkdir -p /mnt/var/cache
     mount -o subvol=@cache,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/cache
 
+    mkdir -p /mnt/var/spool
+    mount -o subvol=@spool,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/spool
+
+    mkdir -p /mnt/var/tmp
+    mount -o subvol=@vartmp,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/tmp
+
     mkdir -p /mnt/tmp
     mount -o subvol=@tmp,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/tmp
 
@@ -101,8 +109,8 @@ gpt label
     mkdir -p /mnt/boot
     mount -o rw,noatime,umask=0077 /dev/nvme0n1p3 /mnt/boot
     
-    mkdir -p /mnt/efi
-    mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/efi
+    mkdir -p /mnt/boot/efi
+    mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/boot/efi
     
     swapon /dev/nvme0n1p4
 
@@ -158,7 +166,7 @@ gpt label
 
 #### Boot loader
 
-    bootctl --esp-path=/efi --boot-path=/boot install
+    bootctl --esp-path=/boot/efi --boot-path=/boot install
 
     nano /efi/loader/loader.conf
       default arch
