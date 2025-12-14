@@ -193,7 +193,7 @@ PARTUUID="$(blkid -s PARTUUID -o value "${DISK}p5" || true)"
 echo Installing bootloader.
 bootctl --esp-path=/boot/efi --boot-path=/boot install
 
-cat > /efi/loader/loader.conf <<'EOF'
+cat > /boot/efi/loader/loader.conf <<'EOF'
 default arch
 timeout 0
 editor 0
