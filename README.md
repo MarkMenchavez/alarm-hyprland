@@ -114,16 +114,6 @@ gpt label
   
     echo "vm-alarm-hyprland" > /etc/hostname
 
-#### Date and Time
-
-    timedatectl set-local-rtc 0
-    timedatectl set-timezone Asia/Singapore
-    timedatectl set-ntp true
-    
-    systemctl enable systemd-timesyncd
-    ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
-    hwclock --systohc
-
 #### Locale
 
     nano /etc/locale.gen
@@ -183,6 +173,16 @@ gpt label
     exit
     umount -R /mnt
     reboot
+
+#### Date and Time
+
+    timedatectl set-local-rtc 0
+    timedatectl set-timezone Asia/Singapore
+    timedatectl set-ntp true
+    
+    systemctl enable systemd-timesyncd
+    ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
+    hwclock --systohc
 
 #### Enable Swapfile / ZRAM
 
