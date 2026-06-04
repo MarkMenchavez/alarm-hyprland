@@ -202,14 +202,15 @@ gpt label
 
 #### Packages
 
-    pacman -S fastfetch htop gping -- 
-    pacman -S hyprland             -- Wayland Dynamic Tiling Window Manager
+    pacman -S fastfetch htop gping 
+    
+    pacman -S hyprland             
               
-              mesa mesa-utils      -- OpenGL
+              mesa mesa-utils vulkan-tools
               
-              kitty                -- Terminal Emulator
+              kitty                
               
-              mako                 -- Notification Daemon
+              mako                 
 
               pipewire 
               pipewire-alsa
@@ -245,3 +246,29 @@ gpt label
          mode   = 2048x1152@60
          position = 0x0
          scale = 1
+
+      keybinds
+         Return       - Terminal
+         B            - Browser
+         Q            - Close current window
+         SHIFT X      - Exit Hyprland
+
+#### Pipewire
+
+    systemctl --user enable --now pipewire.service
+    systemctl --user enable --now pipewire-pulse.service
+    systemctl --user enable --now wireplumber.service
+
+#### AUR
+
+    sudo pacman -S base-devel git
+    cd /tmp
+    git clone aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si
+
+#### Browser
+
+    yay -S brave-bin
+
+    
