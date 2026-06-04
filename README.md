@@ -179,10 +179,11 @@ gpt label
     timedatectl set-local-rtc 0
     timedatectl set-timezone Asia/Singapore
     timedatectl set-ntp true
-    
-    systemctl enable systemd-timesyncd
-    ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
-    hwclock --systohc
+
+    # These are redundant.
+    # systemctl enable systemd-timesyncd
+    # ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
+    # hwclock --systohc
 
 #### Enable Swapfile / ZRAM
 
