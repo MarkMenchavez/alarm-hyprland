@@ -9,8 +9,8 @@
 | Settings             |                                                      |
 |----------------------|------------------------------------------------------|
 | Host                 | M1 Macbook Pro                                       |
-| Type 2 Hypervisor    | VMWare Fusion 13.6                                   |
-| Operating System     | Other 64-bit Arm                                     |
+| Type 2 Hypervisor    | VMWare Fusion 26H1                                   |
+| Operating System     | Other Linux 6.x 64-bit Arm                           |
 | Name                 | Arch Linux ARM Hyprland                              |
 | Processors           | 4                                                    |
 | Memory               | 8192 MB                                              |
@@ -20,7 +20,6 @@
 | Networking           | Bridged                                              |
 |                      | Additional computer on the physical Ethernet network |
 | Storage              | NVMe 80 GB                                           |
-| Default Applications | None                                                 |
 | Keyboard & Mouse     | Mac Profile                                          |
   
 ## ISO
@@ -50,69 +49,35 @@ gpt label
 
 | Partition  | Size   | Type                |Type UUID                           |
 |------------|-------:|:-------------------:|:----------------------------------:|
-| nvme0n1p1  | 512M   | BIOS boot           |21686148-6449-6E6F-744E-656564454649|
-| nvme0n1p2  | 1024M  | EFI System          |C12A7328-F81F-11D2-BA4B-00A0C93EC93B|
-| nvme0n1p3  | 2048M  | Linux extended boot |BC13C2FF-59E6-4262-A352-B275FD6F7172|
-| nvme0n1p4  | 8192M  | Linux swap          |0657FD6D-A4AB-43C4-84E5-0933C84B4F4F|
-| nvme0n1p5  | 40960M | Linux root arm-64   |B921B045-1DF0-41C3-AF44-4C6F280D3FAE|
-| nvme0n1p6  | rest   | Linux home          |933AC7E1-2EB4-4F13-B844-0E14E2AEF915|
+| nvme0n1p1  | 1024M  | EFI System          |C12A7328-F81F-11D2-BA4B-00A0C93EC93B|
+| nvme0n1p2  | 2048M  | Linux extended boot |BC13C2FF-59E6-4262-A352-B275FD6F7172|
+| nvme0n1p3  | rest   | Linux root arm-64   |B921B045-1DF0-41C3-AF44-4C6F280D3FAE|
 
 ### Format
 
+    mkfs.fat -F32 /dev/nvme0n1p1
     mkfs.fat -F32 /dev/nvme0n1p2
-    mkfs.fat -F32 /dev/nvme0n1p3
-    mkswap /dev/nvme0n1p4
-    mkfs.btrfs /dev/nvme0n1p5
-    mkfs.btrfs /dev/nvme0n1p6
+    mkfs.btrfs -L ARCH /dev/nvme0n1p3
 
 ### BTRFS Subvolumes
 
-    mount /dev/nvme0n1p5 /mnt  
+    mount /dev/nvme0n1p3 /mnt  
     btrfs subvolume create /mnt/@  
-    btrfs subvolume create /mnt/@log
-    btrfs subvolume create /mnt/@cache
-    btrfs subvolume create /mnt/@spool
-    btrfs subvolume create /mnt/@vartmp
-    btrfs subvolume create /mnt/@tmp
-    btrfs subvolume create /mnt/@snapshots
-    umount -R /mnt
-
-    mount /dev/nvme0n1p6 /mnt
     btrfs subvolume create /mnt/@home
     umount -R /mnt
 
 ### Mount
 
-    mount -o subvol=@,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt
-
-    mkdir -p /mnt/var/log
-    mount -o subvol=@log,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/log
-    
-    mkdir -p /mnt/var/cache
-    mount -o subvol=@cache,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/cache
-
-    mkdir -p /mnt/var/spool
-    mount -o subvol=@spool,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/spool
-
-    mkdir -p /mnt/var/tmp
-    mount -o subvol=@vartmp,compress=lzo,noatime,ssd /dev/nvme0n1p5 /mnt/var/tmp
-
-    mkdir -p /mnt/tmp
-    mount -o subvol=@tmp,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/tmp
-
-    mkdir -p /mnt/.snapshots
-    mount -o subvol=@snapshots,compress=zstd,noatime,ssd /dev/nvme0n1p5 /mnt/.snapshots
+    mount -o subvol=@,compress=zstd,noatime /dev/nvme0n1p3 /mnt
 
     mkdir -p /mnt/home
-    mount -o subvol=@home,compress=zstd,noatime,ssd /dev/nvme0n1p6 /mnt/home
-    
+    mount -o subvol=@home,compress=zstd,noatime /dev/nvme0n1p3 /mnt/home
+
     mkdir -p /mnt/boot
-    mount -o rw,noatime,umask=0077 /dev/nvme0n1p3 /mnt/boot
-    
-    mkdir -p /mnt/boot/efi
-    mount -o rw,noatime,umask=0077 /dev/nvme0n1p2 /mnt/boot/efi
-    
-    swapon /dev/nvme0n1p4
+    mount /dev/nvme0n1p2 /mnt/boot
+
+    mkdir -p /mnt/efi
+    mount /dev/nvme0n1p1 /mnt/efi
 
 ### Console
 
@@ -151,8 +116,10 @@ gpt label
 
 #### Date and Time
 
+    timedatectl set-local-rtc 0
     timedatectl set-timezone Asia/Singapore
     timedatectl set-ntp true
+    
     systemctl enable systemd-timesyncd
     ln -sf /usr/share/zoneinfo/Asia/Singapore /etc/localtime
     hwclock --systohc
@@ -166,7 +133,7 @@ gpt label
 
 #### Boot loader
 
-    bootctl --esp-path=/boot/efi --boot-path=/boot install
+    bootctl --esp-path=/efi --boot-path=/boot install
 
     nano /efi/loader/loader.conf
       default arch
@@ -177,9 +144,9 @@ gpt label
       title   Arch Linux ARM
       linux   /Image
       initrd  /initramfs-linux.img
-      options root=PARTUUID=<PARTUUID-of-p5> rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@ quiet splash loglevel=0 rd.udev.log_level=0
+      options root=PARTUUID=<PARTUUID-of-p3> rootfstype=btrfs rw rootflags=rw,noatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=@ quiet splash loglevel=0 rd.udev.log_level=0
 
-    blkid /dev/nvme0n1p5
+    blkid /dev/nvme0n1p3
 
 #### MKINITCPIO
 
@@ -193,7 +160,7 @@ gpt label
     
     # This might be redundant, 
     # plymouth-set-default-theme -R <theme> already calls mkinitcpio internally
-    mkinitcpio -P
+    # mkinitcpio -P
 
 #### Services
 
@@ -203,13 +170,7 @@ gpt label
     pacman -S pacman-contrib --noconfirm --needed
     systemctl enable paccache.timer
 
-#### Packages
-
-    pacman -Sy mesa
-
 #### User Accounts  
-  
-    passwd
   
     useradd -m -G wheel -s /bin/bash mcdm -c "Mark Menchavez"
     passwd mcdm
@@ -222,4 +183,65 @@ gpt label
     exit
     umount -R /mnt
     reboot
+
+#### Enable Swapfile / ZRAM
+
+    btrfs filesystem mkswapfile --size 4G /swapfile
+    swapon /swapfile
+
+    pacman -S zram-generator
+    sudo nano /etc/systemd/zram-generator.conf
+    [zram0]
+    zram-size = ram / 2
+    compression-algorithm = zstd
+    swap-priority = 100
+    sudo systemctl restart systemd-zram-setup@zram0.service
     
+    echo "vm.swappiness=80" | sudo tee /etc/sysctl.d/99-swappiness.conf
+    sudo sysctl --system
+
+#### Packages
+
+    pacman -S fastfetch htop gping -- 
+    pacman -S hyprland             -- Wayland Dynamic Tiling Window Manager
+              
+              mesa mesa-utils      -- OpenGL
+              
+              kitty                -- Terminal Emulator
+              
+              mako                 -- Notification Daemon
+
+              pipewire 
+              pipewire-alsa
+              pipewire-pulse
+              gst-plugin-pipewire
+              wireplumber
+              pavucontrol              
+              
+              xdg-desktop-portal
+              xdg-desktop-portal-hyprland
+              xdg-desktop-portal-gtk
+              
+              hyprpolkitagent
+
+              qt5-wayland
+              qt6-wayland
+
+              noto-fonts
+              ttf-jetbrains-mono-nerd
+
+  #### Hyprland Config
+
+      mkdir -p ~/.config/hypr
+      cp /usr/share/hypr/hyprland.lua ~/.config/hypr
+
+      nano ~/.config/hypr/hyprland.lua
+
+      env 
+      LIBGL_ALWAYS_SOFTWARE = 1
+
+      monitor
+         output = Virtual-1
+         mode   = 2048x1152@60
+         position = 0x0
+         scale = 1
