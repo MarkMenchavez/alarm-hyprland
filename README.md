@@ -187,8 +187,11 @@ gpt label
 
 #### Enable Swapfile / ZRAM
 
-    btrfs filesystem mkswapfile --size 4G /swapfile
+    btrfs filesystem mkswapfile --size 8G /swapfile
     swapon /swapfile
+
+    sudo nano /etc/fstab
+    /swapfile none swap defaults 0 0
 
     pacman -S zram-generator
     sudo nano /etc/systemd/zram-generator.conf
@@ -196,6 +199,9 @@ gpt label
     zram-size = ram / 2
     compression-algorithm = zstd
     swap-priority = 100
+
+    sudo systemctl daemon-reload
+    
     sudo systemctl restart systemd-zram-setup@zram0.service
     
     echo "vm.swappiness=80" | sudo tee /etc/sysctl.d/99-swappiness.conf
