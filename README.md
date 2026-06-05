@@ -26,20 +26,17 @@
 
 <https://archboot.com>
 
-archboot-2025.12.07-02.09-6.18.0-3-aarch64-ARCH-local-aarch64.iso
+archboot-2025.12.31-xxxxxxx-aarch64-ARCH-local-aarch64.iso
 
-## Network
+## Networking
 
     systemctl restart systemd-networkd
     systemctl restart systemd-resolved
+
     ip link show
     ip addr show
     ping 8.8.8.8
     ping mirror.archlinuxarm.org
-
-## Install
-
-`curl -fsSL https://raw.githubusercontent.com/markmenchavez/alarm-hyprland/main/install.sh | bash`
 
 ### Partition
 
@@ -79,13 +76,6 @@ gpt label
     mkdir -p /mnt/efi
     mount /dev/nvme0n1p1 /mnt/efi
 
-### Console
-
-    mkdir -p /mnt/etc
-    nano /etc/vconsole.conf
-      KEYMAP=us
-      FONT=ter-v16n
-
 ### Pacstrap
 
     pacstrap /mnt base \
@@ -114,11 +104,18 @@ gpt label
   
     echo "vm-alarm-hyprland" > /etc/hostname
 
+### Console
+
+    nano /etc/vconsole.conf
+      KEYMAP=us
+      FONT=ter-v16n
+
 #### Locale
 
     nano /etc/locale.gen
-      en_US.UTF-8 UTF-8
+       en_US.UTF-8 UTF-8
     locale-gen
+    
     echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 #### Boot loader
@@ -140,7 +137,7 @@ gpt label
 
 #### MKINITCPIO
 
-    pacman -S plymouth --noconfirm --needed
+    pacman -S plymouth
 
     nano /etc/mkinitcpio.conf
           MODULES=(btrfs vfat crc32c)
@@ -265,12 +262,12 @@ gpt label
 
 #### Pipewire / Wireplumber
 
-    # These are not needed.
+    # These are not needed. They automatically start after reboot
     systemctl --user enable --now pipewire.service
     systemctl --user enable --now pipewire-pulse.service
     systemctl --user enable --now wireplumber.service
 
-    # Only if audio is stutter
+    # Only if audio does stutter
     sudo nano /usr/share/wireplumber.conf.d/alsa-vm.conf
       audio.format "S16LE"
       
@@ -294,7 +291,7 @@ gpt label
     sudo mkdir -p /etc/sddm.conf.d
     sudo nano /etc/sddm.conf.d/theme.conf
       [Theme]
-      Current=breeze
+      Current=pixie
     
     sudo systemctl enable sddm
 
