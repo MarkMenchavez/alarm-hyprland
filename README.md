@@ -283,6 +283,18 @@ gpt label
 
     yay -S brave-bin
 
+#### Display Manager
+
+    sudo pacman -S sddm qt6-declarative qt6-svg
+    yay -S pixie-sddm-git
+
+    sudo mkdir -p /etc/sddm.conf.d
+    sudo nano /etc/sddm.conf.d/theme.conf
+      [Theme]
+      Current=breeze
+    
+    sudo systemctl enable sddm
+
 #### Others
 
     sudo pacman -S xdg-user-dirs
