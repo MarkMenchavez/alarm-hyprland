@@ -254,6 +254,9 @@ gpt label
          position = 0x0
          scale = 1
 
+      autostart
+         systemctl --user start hyprpolkitagent
+
       keybinds
          Return       - Terminal
          B            - Browser
