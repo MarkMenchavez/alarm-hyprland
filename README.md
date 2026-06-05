@@ -260,12 +260,17 @@ gpt label
          Q            - Close current window
          SHIFT X      - Exit Hyprland
 
-#### Pipewire
+#### Pipewire / Wireplumber
 
+    # These are not needed.
     systemctl --user enable --now pipewire.service
     systemctl --user enable --now pipewire-pulse.service
     systemctl --user enable --now wireplumber.service
 
+    # Only if audio is stutter
+    sudo nano /usr/share/wireplumber.conf.d/alsa-vm.conf
+      audio.format "S16LE"
+      
 #### AUR
 
     sudo pacman -S base-devel git
@@ -277,5 +282,13 @@ gpt label
 #### Browser
 
     yay -S brave-bin
+
+#### Others
+
+    sudo pacman -S xdg-user-dirs
+    xdg-user-dirs-update
+
+    sudo pacman -S starship
+    
 
     
