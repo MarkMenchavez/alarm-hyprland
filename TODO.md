@@ -8,15 +8,17 @@
 - [ ] pacman mirror list
 - [ ] timeshift
 - [ ] ufw
-- [ ] git base-devel
-- [ ] yay AUR helper
-- [ ] Hyprland
-- [ ] mako
-- [ ] pipewire wireplumber pipewire-audio pipewire-pulse pipewire-alsa gst-plugin-pipewire pavucontrol
-- [ ] xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-- [ ] hyprpolkitagent
-- [ ] kitty
-- [ ] noto-fonts ttf-jetbrains-mono-nerd
-- [ ] hyprpaper swww waypaper
-- [ ] ly
-- [ ] dotfiles
+- [x] git base-devel
+- [x] yay AUR helper
+- [x] Hyprland
+- [x] mako
+- [x] pipewire wireplumber pipewire-pulse pipewire-alsa gst-plugin-pipewire pavucontrol
+- [x] xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+- [x] hyprpolkitagent
+- [x] kitty
+- [x] noto-fonts ttf-jetbrains-mono-nerd
+- [ ] hyprpaper
+- [x] sddm
+- [x] brave-bin
+- [x] visual-studio-code-bin
+- [ ] dotnet-sdk 
