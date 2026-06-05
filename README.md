@@ -270,7 +270,7 @@ gpt label
 
     sudo pacman -S base-devel git
     cd /tmp
-    git clone aur.archlinux.org/yay.git
+    git clone https://aur.archlinux.org/yay.git
     cd yay
     makepkg -si
 
